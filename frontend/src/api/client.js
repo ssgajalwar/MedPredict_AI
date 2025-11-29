@@ -6,6 +6,12 @@ export const fetchDashboardOverview = async () => {
     return response.json();
 };
 
+export const fetchPatientHistory = async (days = 30) => {
+    const response = await fetch(`${API_BASE_URL}/dashboard/history?days=${days}`);
+    if (!response.ok) throw new Error('Failed to fetch patient history');
+    return response.json();
+};
+
 export const fetchResourceStatus = async () => {
     const response = await fetch(`${API_BASE_URL}/resources/status`);
     if (!response.ok) throw new Error('Failed to fetch resource status');

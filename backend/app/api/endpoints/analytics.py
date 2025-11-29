@@ -45,7 +45,7 @@ async def get_surge_patterns():
         if any(keyword in title_lower for keyword in epidemic_keywords):
             surge_causes["epidemics"].append({
                 "type": next((kw for kw in epidemic_keywords if kw in title_lower), "general"),
-                "source": article.get("source", {}).get("name", "Unknown"),
+                "source": article.get("source", "Unknown"),
                 "published": article.get("publishedAt", "")
             })
     
@@ -169,3 +169,53 @@ async def get_environmental_impact():
         },
         "health_advisory": "High risk due to pollution" if aqi > 200 else "Moderate risk" if aqi > 100 else "Low risk"
     }
+
+# Simple in-memory cache for advisory
+advisory_cache = {
+    "data": None,
+    "timestamp": None
+}
+
+@router.get("/patient-advisory")
+async def get_patient_advisory():
+    """
+    Get AI-driven patient advisory based on real-time environmental and hospital data.
+    Returns JSON to be fed into an LLM for SMS/Notification generation.
+    Cached for 2 hours.
+    """
+    # Check cache
+    if advisory_cache["data"] and advisory_cache["timestamp"]:
+        if datetime.now() - advisory_cache["timestamp"] < timedelta(hours=2):
+            return advisory_cache["data"]
+
+    # Fetch real-time data
+    weather = await weather_service.get_aqi()
+    patient_data = data_service.get_latest_patient_data()
+    staff_data = data_service.get_staff_data()
+    
+    # Extract metrics
+    aqi = weather.get("aqi", 0)
+    temp = int(weather.get("temp", 25))
+    
+    # Heuristic for waiting time: (Patients / Staff) * 15 mins
+    total_patients = patient_data.get("total_patients", 0)
+    available_staff = max(1, staff_data.get("available_staff", 10)) # Avoid div by zero
+    waiting_time = int((total_patients / available_staff) * 15)
+    
+    # Heuristic for rainfall based on description (since API doesn't return mm directly)
+    rainfall = 0
+    if "rain" in weather.get("description", "").lower():
+        rainfall = 20 # Assume moderate rain if mentioned
+    
+    advisory = news_service.get_patient_advisory(
+        aqi=aqi,
+        rainfall=rainfall,
+        temperature=temp,
+        waiting_time=waiting_time
+    )
+    
+    # Update cache
+    advisory_cache["data"] = advisory
+    advisory_cache["timestamp"] = datetime.now()
+    
+    return advisory
