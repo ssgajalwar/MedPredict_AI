@@ -10,7 +10,7 @@ from datetime import datetime
 # Ensure project root is on sys.path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from Data_Generator.hospital_data_generator import ComprehensiveHospitalDataGenerator
+from Data_Generator.hospital_data_generator import LilavatiMumbaiDataGenerator
 
 
 class DataGeneratorAgent:
@@ -42,13 +42,13 @@ class DataGeneratorAgent:
         try:
             print(f"\n[1/3] Initializing data generator...")
             print(f"  Date range: {start_date} to {end_date}")
-            self.generator = ComprehensiveHospitalDataGenerator(start_date=start_date, end_date=end_date)
+            self.generator = LilavatiMumbaiDataGenerator(start_date=start_date, end_date=end_date)
 
             print(f"\n[2/3] Generating hospital data...")
-            self.generator.run_complete_generation()
+            self.generator.run_full()
 
             print(f"\n[3/3] Exporting data to media folder...")
-            self.generator.export_data(output_dir=self.output_dir)
+            self.generator.export_csv(out_dir=self.output_dir)
 
             self.status = "completed"
             result = {

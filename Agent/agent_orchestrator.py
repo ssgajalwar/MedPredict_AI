@@ -12,6 +12,7 @@ from datetime import datetime
 from data_generator_agent import DataGeneratorAgent
 from forecaster_agent import ForecasterAgent
 from resource_allocator_agent import ResourceAllocatorAgent
+from model_training_agent import ModelTrainingAgent
 
 
 class AgentOrchestrator:
@@ -23,6 +24,7 @@ class AgentOrchestrator:
         self.data_agent = DataGeneratorAgent()
         self.forecast_agent = ForecasterAgent()
         self.allocator_agent = ResourceAllocatorAgent()
+        self.training_agent = ModelTrainingAgent()
         
         self.pipeline_results = {}
         self.status = "initialized"
@@ -31,6 +33,7 @@ class AgentOrchestrator:
                               generate_data=True,
                               run_forecasts=True,
                               allocate_resources=True,
+                              train_models=True,
                               start_date="2022-01-01",
                               end_date="2024-11-22",
                               target_column='total_patients',
@@ -105,6 +108,18 @@ class AgentOrchestrator:
             if allocation_result['status'] != 'success':
                 print("\n[!] Resource allocation had issues...")
         
+        # Phase 4: Model Training
+        if train_models:
+            print("\n\n" + "=" * 80)
+            print("=" + " " * 26 + "PHASE 4: MODEL TRAINING" + " " * 30 + "=")
+            print("=" * 80)
+            
+            training_result = self.training_agent.train_all_models()
+            self.pipeline_results['model_training'] = training_result
+            
+            if training_result['status'] != 'success':
+                print("\n[!] Model training had issues...")
+        
         # Compile final results
         self.status = "completed"
         return self._compile_results(pipeline_start, "success")
@@ -126,7 +141,8 @@ class AgentOrchestrator:
             "summary": {
                 "data_generated": self.pipeline_results.get('data_generation', {}).get('status') == 'success',
                 "forecasts_completed": self.pipeline_results.get('forecasting', {}).get('models_successful', 0),
-                "allocations_generated": self.pipeline_results.get('resource_allocation', {}).get('status') == 'success'
+                "allocations_generated": self.pipeline_results.get('resource_allocation', {}).get('status') == 'success',
+                "models_trained": self.pipeline_results.get('model_training', {}).get('models_trained', 0)
             }
         }
         
@@ -161,6 +177,7 @@ class AgentOrchestrator:
         print(f"  [OK] Data Generated: {summary['data_generated']}")
         print(f"  [OK] Forecasts Completed: {summary['forecasts_completed']}/3 models")
         print(f"  [OK] Allocations Generated: {summary['allocations_generated']}")
+        print(f"  [OK] Models Trained: {summary.get('models_trained', 0)}/4 models")
         
         print("\n" + "=" * 80)
         print(" " * 20 + "[OK] PIPELINE COMPLETED SUCCESSFULLY!")
@@ -170,6 +187,7 @@ class AgentOrchestrator:
         print("  [DIR] Hospital Data: media/hospital_data_csv/")
         print("  [DIR] Forecasts: media/forecast/")
         print("  [DIR] Allocations: media/resource_allocation/")
+        print("  [DIR] Trained Models: backend/models/")
         print("  [FILE] Pipeline Report: media/pipeline_report.json")
 
 
