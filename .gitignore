@@ -42,5 +42,6 @@ Data_Generator/analysis_results/city_summary.csv
 *.csv
 Data_Generator/hospital_data_csv/patient_visits.csv
 *.json
+!package.json
 *.png
 *.pyc
