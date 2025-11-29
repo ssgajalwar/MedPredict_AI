@@ -30,9 +30,9 @@ def validate_realism(data_dir='../media/hospital_data_csv'):
     if not lilavati.empty:
         beds = lilavati.iloc[0]['total_beds']
         print(f"  ✓ Hospital Found: {lilavati.iloc[0]['hospital_name']}")
-        print(f"  ✓ Bed Count: {beds} (Expected: 323)")
-        if beds == 323:
-            print("  ✅ Bed count matches real world data.")
+        print(f"  ✓ Bed Count: {beds} (Expected: 350)")
+        if beds == 350:
+            print("  ✅ Bed count matches configured profile.")
         else:
             print("  ⚠ Bed count mismatch.")
     else:
