@@ -32,7 +32,7 @@ class ModelTrainingAgent:
         try:
             # Ensure output directories exist
             os.makedirs('backend/models', exist_ok=True)
-            os.makedirs('backend/data', exist_ok=True)
+            os.makedirs('media/data', exist_ok=True)
             os.makedirs('media/modal_train_data', exist_ok=True)
             
             # Step 1: Prepare training data
@@ -118,7 +118,7 @@ class ModelTrainingAgent:
             return {
                 'status': 'success',
                 'model_file': 'backend/models/patient_volume_forecaster.pkl',
-                'data_file': 'backend/data/patient_volume_training_data.csv'
+                'data_file': 'media/data/patient_volume_training_data.csv'
             }
         except Exception as e:
             return {'status': 'failed', 'error': str(e)}

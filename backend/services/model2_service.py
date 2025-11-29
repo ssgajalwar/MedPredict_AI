@@ -9,7 +9,7 @@ from pathlib import Path
 from datetime import datetime, timedelta
 
 class DepartmentDistributionService:
-    def __init__(self, models_dir='backend/models', data_dir='backend/data'):
+    def __init__(self, models_dir='backend/models', data_dir='media/data'):
         self.models_dir = Path(models_dir)
         self.data_dir = Path(data_dir)
         self.model = None
