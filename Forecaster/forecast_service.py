@@ -146,8 +146,13 @@ class PatientVolumeForecastingService:
             }).reset_index()
             future_df = pd.merge(future_df, future_events_agg, on='date', how='left')
         
-        future_df['is_public_holiday'] = future_df.get('is_public_holiday', 0).fillna(0).astype(int)
-        future_df['event_impact_multiplier'] = future_df.get('event_impact_multiplier', 1.0).fillna(1.0)
+        if 'is_public_holiday' not in future_df.columns:
+            future_df['is_public_holiday'] = 0
+        future_df['is_public_holiday'] = future_df['is_public_holiday'].fillna(0).astype(int)
+        
+        if 'event_impact_multiplier' not in future_df.columns:
+            future_df['event_impact_multiplier'] = 1.0
+        future_df['event_impact_multiplier'] = future_df['event_impact_multiplier'].fillna(1.0)
         
         # Lag features - use recent historical values
         last_volume = self.historical_data['daily_patient_volume'].iloc[-1]
@@ -174,7 +179,12 @@ class PatientVolumeForecastingService:
         # Generate features
         future_features = self.generate_future_features(start_date, end_date)
         
-        # Prepare features for prediction
+        # Ensure feature columns exist
+        missing_cols = [c for c in self.feature_columns if c not in future_features.columns]
+        if missing_cols:
+            for c in missing_cols:
+                future_features[c] = 0
+                
         X_future = future_features[self.feature_columns]
         
         # Handle any missing values
